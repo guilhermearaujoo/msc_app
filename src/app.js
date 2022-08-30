@@ -1,7 +1,5 @@
 const express = require('express');
-const connection = require('./models/connection');
-
-const travelModel = require('./models/travel.model');
+const { travelModel, passengerModel, waypointModel } = require('./models');
 
 const app = express();
 
@@ -13,22 +11,20 @@ const TRAVEL_IN_PROGRESS = 3;
 const TRAVEL_FINISHED = 4;
 
 const isPassengerExists = async (passengerId) => {
-  const [[passenger]] = await connection.execute(
-    'SELECT * FROM passengers WHERE id = ?',
-    [passengerId],
-  );
+  const passenger = await passengerModel.findById(passengerId);
   if (passenger) return true;
   return false;
 };
 
 const saveWaypoints = (waypoints, travelId) => {
   if (waypoints && waypoints.length > 0) {
-    return waypoints.map(async (value) => connection.execute(
-      'INSERT INTO waypoints (address, stop_order, travel_id) VALUE (?, ?, ?)',
-      [value.address, value.stopOrder, travelId],
-    ));
+    return waypoints.map(async (value) =>
+      waypointModel.insert({
+        address: value.address,
+        stopOrder: value.stopOrder,
+        travelId,
+      }));
   }
-  return [];
 };
 
 app.post('/passengers/:passengerId/request/travel', async (req, res) => {

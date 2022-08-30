@@ -52,14 +52,7 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
 });
 
 app.get('/drivers/open/travels', async (_req, res) => {
-<<<<<<< HEAD
   const result = await travelModel.findByTravelStatusId(WAITING_DRIVER);
-=======
-  const [result] = await connection.execute(
-    'SELECT * FROM travels WHERE travel_status_id = ?',
-    [WAITING_DRIVER],
-  );
->>>>>>> main
   res.status(200).json(result);
 });
 

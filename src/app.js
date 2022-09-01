@@ -1,6 +1,6 @@
 const express = require('express');
 const connection = require('./models/connection');
-const { travelModel } = require('./models/travel.model');
+const travelModel = require('./models/travel.model');
 
 const app = express();
 

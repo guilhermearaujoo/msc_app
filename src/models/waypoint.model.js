@@ -1,20 +1,18 @@
 const snakeize = require('snakeize');
 const connection = require('./connection');
 
-const insert = async (waipoint) => {
-  const columns = Object.keys(snakeize(waipoint))
+const insert = async (waypoint) => {
+  const columns = Object.keys(snakeize(waypoint))
     .map((key) => `${key}`)
     .join(',');
 
-    console.log(columns);
-
-  const placeholders = Object.keys(waipoint)
+  const placeholders = Object.keys(waypoint)
     .map((_key) => '?')
     .join(',');
 
   const [{ insertId }] = await connection.execute(
     `INSERT INTO waypoints (${columns}) VALUE (${placeholders})`,
-    [...Object.values(waipoint)],
+    [...Object.values(waypoint)],
   );
 
   return insertId;

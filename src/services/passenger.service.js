@@ -32,7 +32,7 @@ const requestTravel = async (passengerId, startingAddress, endingAddress, waypoi
   if (validationResult.type) return validationResult;
   
   if (isPassengerExists(passengerId)) {
-    const { id: travelId } = await travelModel.insert({
+    const travelId = await travelModel.insert({
       passengerId,
       startingAddress,
       endingAddress,

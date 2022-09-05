@@ -1,6 +1,5 @@
 const express = require('express');
-const connection = require('./models/connection');
-const { travelModel } = require('./models/travel.model');
+const connection = require('./connection');
 
 const app = express();
 
@@ -35,23 +34,33 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const { startingAddress, endingAddress, waypoints } = req.body;
 
   if (isPassengerExists(passengerId)) {
-        // Aqui substituímos o trecho de código SQL pela chamada a função insert do model
-    // e armazenamos o retorno da função na variável travelId 
-    const travelId = await travelModel.insert({ passengerId, startingAddress, endingAddress });
+    const [resultTravel] = await connection.execute(
+      `INSERT INTO travels 
+          (passenger_id, starting_address, ending_address) VALUE (?, ?, ?)`,
+      [
+        passengerId,
+        startingAddress,
+        endingAddress,
+      ],
+    );
+    await Promise.all(saveWaypoints(waypoints, resultTravel.insertId));
 
-    // Renomeamos o parâmetro result.insertId para travelId
-    await Promise.all(saveWaypoints(waypoints, travelId));
-
-    // Aqui substituímos a consulta SQL pela nossa função findById
-    const travel = await travelModel.findById(travelId);
-    return res.status(201).json(travel);
+    const [[response]] = await connection.execute(
+      'SELECT * FROM travels WHERE id = ?',
+      [resultTravel.insertId],
+    );
+    res.status(201).json(response);
+    return;
   }
 
   res.status(500).json({ message: 'Ocorreu um erro' });
 });
 
 app.get('/drivers/open/travels', async (_req, res) => {
-  const result = await travelModel.findByTravelStatusId(WAITING_DRIVER);
+  const [result] = await connection.execute(
+    'SELECT * FROM travels WHERE travel_status_id = ?',
+    [WAITING_DRIVER],
+  );
   res.status(200).json(result);
 });
 

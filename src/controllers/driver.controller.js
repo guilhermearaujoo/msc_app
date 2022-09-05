@@ -10,7 +10,7 @@ const openTravel = async (_req, res) => {
 const travelAssign = async (req, res) => {
   const { travelId, driverId } = req.params;
   const { type, message } = await driverService.travelAssign({ travelId, driverId });
-  if (type) return res.status(errorMap(type)).json({ message });
+  if (type) return res.status(errorMap.mapError(type)).json({ message });
   
   res.status(200).json(message);
 };
@@ -18,7 +18,7 @@ const travelAssign = async (req, res) => {
 const startTravel = async (req, res) => {
     const { travelId, driverId } = req.params;
     const { type, message } = await driverService.startTravel({ travelId, driverId });
-    if (type) return res.status(errorMap(type)).json({ message });
+    if (type) return res.status(errorMap.mapError(type)).json({ message });
   
     res.status(200).json(message);
   };
@@ -26,7 +26,7 @@ const startTravel = async (req, res) => {
   const endTravel = async (req, res) => {
     const { travelId, driverId } = req.params;
     const { type, message } = await driverService.endTravel({ travelId, driverId });
-    if (type) res.status(errorMap(type)).json({ message });
+    if (type) res.status(errorMap.mapError(type)).json({ message });
   
     res.status(200).json(message);
   };

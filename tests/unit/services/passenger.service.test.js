@@ -65,10 +65,6 @@ describe('Verificando service pessoa passageira', function () {
         travelStatusId: WAITING_DRIVER,
         startingAddress: 'Rua X',
         endingAddress: 'Rua Y',
-        waypoints: [{
-          address: 'Rua Z',
-          stopOrder: 1,
-        }],
         requestDate: '2022-08-24T03:04:04.374Z',
       });
     });

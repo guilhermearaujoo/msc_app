@@ -1,4 +1,3 @@
-// tests/unit/controllers/driver.controller.test.j
 const chai = require('chai');
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
@@ -16,8 +15,7 @@ describe('Teste de unidade do driverController', function () {
 
     res.status = sinon.stub().returns(res);
     res.json = sinon.stub().returns();
-    sinon
-      .stub(driverService, 'getWaitingDriverTravels')
+    sinon.stub(driverService, 'getWaitingDriverTravels')
       .resolves({ type: null, message: [] });
 
     await driverController.openTravel(req, res);

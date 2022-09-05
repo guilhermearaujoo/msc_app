@@ -1,6 +1,5 @@
 const { travelModel } = require('../models');
 const {
-  validateTripSchema,
   validateInputValues,
   validateAlreadyDriver,
 } = require('./validations/validationsInputValues');
@@ -17,12 +16,8 @@ const getWaitingDriverTravels = async () => {
 
 /* Aceitar a viagem; */
 const travelAssign = async ({ travelId, driverId }) => {
-  /* Validar se travelId e driverId são ids VÁLIDOS */
-  let error = validateTripSchema({ travelId, driverId });
-  if (error.type) return error;
-
   /* Validar se travelId e driverId são ids EXISTENTES */
-  error = await validateInputValues({ travelId, driverId });
+  let error = await validateInputValues({ travelId, driverId });
   if (error.type) return error;
 
   /* Validar se o motorista que esta tentando pegar uma viagem, não esta em outra */
@@ -38,12 +33,8 @@ const travelAssign = async ({ travelId, driverId }) => {
 
 /* Iniciar a viagem; */
 const startTravel = async ({ travelId, driverId }) => {
-  /* Validar se travelId e driverId são ids VÁLIDOS */
-  let error = validateTripSchema({ travelId, driverId });
-  if (error.type) return error;
-
   /* Validar se travelId e driverId são ids EXISTENTES */
-  error = await validateInputValues({ travelId, driverId });
+  const error = await validateInputValues({ travelId, driverId });
   if (error.type) return error;
 
   /* Alterar o status de "motorista a caminho" para "viagem em andamento" */
@@ -56,12 +47,8 @@ const startTravel = async ({ travelId, driverId }) => {
 
 /* Encerrar a viagem; */
 const endTravel = async ({ travelId, driverId }) => {
-  /* Validar se travelId e driverId são ids VÁLIDOS */
-  let error = validateTripSchema({ travelId, driverId });
-  if (error.type) return error;
-
   /* Validar se travelId e driverId são ids EXISTENTES */
-  error = await validateInputValues({ travelId, driverId });
+  const error = await validateInputValues({ travelId, driverId });
   if (error.type) return error;
 
   /* Alterar o status de "viagem em andamento" para "viagem finalizada" */

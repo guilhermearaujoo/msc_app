@@ -34,7 +34,7 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const { passengerId } = req.params;
   const { startingAddress, endingAddress, waypoints } = req.body;
 
-  if (isPassengerExists(passengerId)) {
+  if (await isPassengerExists(passengerId)) {
     // Aqui substituímos o trecho de código SQL pela chamada a função insert do model
     // e armazenamos o retorno da função na variável travelId 
     const travelId = await travelModel.insert({ passengerId, startingAddress, endingAddress });

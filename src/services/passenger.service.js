@@ -44,6 +44,8 @@ const requestTravel = async (passengerId, startingAddress, endingAddress, waypoi
     const travel = await travelModel.findById(travelId);
     return { type: null, message: travel };
   }
+
+  return { type: 'PASSENGER_NOT_FOUND', message: 'Passenger not found' };
 };
 
 const findAll = async () => {

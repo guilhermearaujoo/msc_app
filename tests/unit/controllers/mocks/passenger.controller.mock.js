@@ -41,8 +41,18 @@ const happyResponseCreateTravelObject = {
   requestDate: '2022-08-28T21:10:35.000Z',
 };
 
+const passengerMock = {
+  name: 'Bruce Lane',
+  email: 'bruce.lane@acme.com',
+  phone: '(77) 8179-0943',
+};
+
+const newPassengerMock = { id: 1, ...passengerMock };
+
 module.exports = {
   happyReqCreateTravelObject,
   happyControllerResponseCreateTravelObject,
   happyResponseCreateTravelObject,
+  passengerMock,
+  newPassengerMock,
 };

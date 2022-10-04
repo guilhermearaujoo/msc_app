@@ -1,4 +1,3 @@
-
 -- Excluindo a database caso ela já exista e criando logo em seguida
 DROP DATABASE IF EXISTS trybecardb;
 CREATE DATABASE trybecardb;

@@ -1,13 +1,90 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { requestTravel } = require('../../../src/services/passenger.service');
+const {
+  findAll, findById, requestTravel, createPassenger,
+} = require('../../../src/services/passenger.service');
 const travelModel = require('../../../src/models/travel.model');
 const waypointModel = require('../../../src/models/waypoint.model');
 const passengerModel = require('../../../src/models/passenger.model');
 
-const { travelResponse } = require('./mocks/passenger.service.mock');
+const {
+  travelResponse, allPassengers, invalidValue,
+  validName, validEmail, validPhone,
+} = require('./mocks/passenger.service.mock');
 
 describe('Verificando service pessoa passageira', function () {
+  describe('listagem de pessoas passageiras', function () {
+    it('retorna a lista completa de pessoas passageiras', async function () {
+      sinon.stub(passengerModel, 'findAll').resolves(allPassengers);
+      
+      const result = await findAll();
+
+      expect(result.message).to.deep.equal(allPassengers);
+    });
+  });
+  
+  describe('busca de uma pessoa passageira', function () {
+    it('retorna um erro caso receba um ID inválido', async function () {
+      const result = await findById(invalidValue);
+      
+      expect(result.type).to.equal('INVALID_VALUE');
+      expect(result.message).to.equal('"id" must be a number');
+    });
+
+    it('retorna um erro caso a pessoa passageira não existe', async function () {
+      sinon.stub(passengerModel, 'findById').resolves(undefined);
+     
+      const result = await findById(1);
+      
+      expect(result.type).to.equal('PASSENGER_NOT_FOUND');
+      expect(result.message).to.equal('Passenger not found');
+    });
+    
+    it('retorna a pessoa passageira caso ID existente', async function () {
+      sinon.stub(passengerModel, 'findById').resolves(allPassengers[0]);
+      
+      const result = await findById(1);
+
+      expect(result.type).to.equal(null);
+      expect(result.message).to.deep.equal(allPassengers[0]);
+    });
+  });
+
+  describe('cadastro de uma pessoa passageira com valores inválidos', function () {
+    it('retorna um erro ao passar um nome inválido', async function () {
+      const result = await createPassenger(invalidValue, validEmail, validPhone);
+
+      expect(result.type).to.equal('INVALID_VALUE');
+      expect(result.message).to.equal('"name" length must be at least 3 characters long');
+    });
+
+    it('retorna um erro ao passar um email inválido', async function () {
+      const result = await createPassenger(validName, invalidValue, validPhone);
+
+      expect(result.type).to.equal('INVALID_VALUE');
+      expect(result.message).to.equal('"email" must be a valid email');
+    });
+
+    it('retorna um erro ao passar um telefone inválido', async function () {
+      const result = await createPassenger(validName, validEmail, invalidValue);
+
+      expect(result.type).to.equal('INVALID_VALUE');
+      expect(result.message).to.equal('"phone" length must be at least 9 characters long');
+    });
+  });
+
+  describe('cadastro de uma pessoa passageira com valores válidos', function () {
+    it('retorna o ID da pessoa passageira cadastrada', async function () {
+      sinon.stub(passengerModel, 'insert').resolves([{ insertId: 1 }]);
+      sinon.stub(passengerModel, 'findById').resolves(allPassengers[0]);
+      
+      const result = await createPassenger(validName, validEmail, validPhone);
+
+      expect(result.type).to.equal(null);
+      expect(result.message).to.deep.equal(allPassengers[0]);
+    });
+  });
+
   describe('solicitação de viagem', function () {
     it('sem pontos de parada é realizada com sucesso', async function () {
       // arrange

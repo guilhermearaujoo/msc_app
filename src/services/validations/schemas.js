@@ -13,7 +13,13 @@ const addRequestTravelSchema = Joi.object({
   endingAddress: pointSchema.invalid(Joi.ref('startingAddress')),
   waypoints: Joi.array().items(waypointSchema) });
 
-  module.exports = {
-    idSchema,
-    addRequestTravelSchema,
-  };
+const addPassengerSchema = Joi.object({
+  name: Joi.string().min(3).required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().min(9).max(20).required() });
+
+module.exports = {
+  idSchema,
+  addRequestTravelSchema,
+  addPassengerSchema,
+};

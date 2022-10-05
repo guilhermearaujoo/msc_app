@@ -3,7 +3,7 @@ const {
   validateRequestTravelSchema, validateNewPassenger, validateId,
 } = require('./validations/validationsInputValues');
 
-const isPassengerExists = async (passengerId) => {
+const doesPassengerExist = async (passengerId) => {
   const passenger = await passengerModel.findById(passengerId);
   if (passenger) return true;
   return false;
@@ -33,7 +33,7 @@ const requestTravel = async (passengerId, startingAddress, endingAddress, waypoi
 
   if (validationResult.type) return validationResult;
   
-  if (await isPassengerExists(passengerId)) {
+  if (await doesPassengerExist(passengerId)) {
     const travelId = await travelModel.insert({
       passengerId,
       startingAddress,

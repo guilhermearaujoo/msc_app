@@ -1,4 +1,5 @@
 const express = require('express');
+const camelize = require('camelize'); // para entender melhor esse pacote vocÊ pode dar uma olhadinha aqui: https://www.npmjs.com/package/camelize
 const connection = require('./connection');
 
 const app = express();
@@ -10,7 +11,7 @@ const DRIVER_ON_THE_WAY = 2;
 const TRAVEL_IN_PROGRESS = 3;
 const TRAVEL_FINISHED = 4;
 
-const doesPassengerExist = async (passengerId) => {
+const isPassengerExists = async (passengerId) => {
   const [[passenger]] = await connection.execute(
     'SELECT * FROM passengers WHERE id = ?',
     [passengerId],
@@ -33,7 +34,8 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const { passengerId } = req.params;
   const { startingAddress, endingAddress, waypoints } = req.body;
 
-  if (await doesPassengerExist(passengerId)) {
+
+  if (isPassengerExists(passengerId)) {
     const [resultTravel] = await connection.execute(
       `INSERT INTO travels 
           (passenger_id, starting_address, ending_address) VALUE (?, ?, ?)`,
@@ -44,14 +46,13 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
       ],
     );
     await Promise.all(saveWaypoints(waypoints, resultTravel.insertId));
-
     const [[response]] = await connection.execute(
       'SELECT * FROM travels WHERE id = ?',
       [resultTravel.insertId],
     );
-    return res.status(201).json(response);
+    res.status(201).json(camelize(response));
+    return;
   }
-
   res.status(500).json({ message: 'Ocorreu um erro' });
 });
 

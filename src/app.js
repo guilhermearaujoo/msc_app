@@ -1,6 +1,6 @@
 const express = require('express');
-const camelize = require('camelize'); // para entender melhor esse pacote vocÊ pode dar uma olhadinha aqui: https://www.npmjs.com/package/camelize
-const connection = require('./connection');
+const connection = require('./models/connection');
+const { passengerModel, travelModel, waypointModel } = require('./models');
 
 const app = express();
 
@@ -12,20 +12,20 @@ const TRAVEL_IN_PROGRESS = 3;
 const TRAVEL_FINISHED = 4;
 
 const doesPassengerExist = async (passengerId) => {
-  const [[passenger]] = await connection.execute(
-    'SELECT * FROM passengers WHERE id = ?',
-    [passengerId],
-  );
+  const passenger = await passengerModel.findById(passengerId);
   if (passenger) return true;
   return false;
 };
 
 const saveWaypoints = (waypoints, travelId) => {
   if (waypoints && waypoints.length > 0) {
-    return waypoints.map(async (value) => connection.execute(
-      'INSERT INTO waypoints (address, stop_order, travel_id) VALUE (?, ?, ?)',
-      [value.address, value.stopOrder, travelId],
-    ));
+    return waypoints.map(async (value) => {
+      await waypointModel.insert({
+        address: value.address,
+        stopOrder: value.stopOrder,
+        travelId,
+      });
+    });
   }
   return [];
 };
@@ -34,30 +34,16 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const { passengerId } = req.params;
   const { startingAddress, endingAddress, waypoints } = req.body;
   if (await doesPassengerExist(passengerId)) {
-    const [resultTravel] = await connection.execute(
-      `INSERT INTO travels 
-          (passenger_id, starting_address, ending_address) VALUE (?, ?, ?)`,
-      [
-        passengerId,
-        startingAddress,
-        endingAddress,
-      ],
-    );
-    await Promise.all(saveWaypoints(waypoints, resultTravel.insertId));
-    const [[response]] = await connection.execute(
-      'SELECT * FROM travels WHERE id = ?',
-      [resultTravel.insertId],
-    );
-    return res.status(201).json(camelize(response));
+    const travelId = await travelModel.insert({ passengerId, startingAddress, endingAddress });
+    await Promise.all(saveWaypoints(waypoints, travelId));
+    const travel = await travelModel.findById(travelId);
+    return res.status(201).json(travel);
   }
   res.status(500).json({ message: 'Ocorreu um erro' });
 });
 
 app.get('/drivers/open/travels', async (_req, res) => {
-  const [result] = await connection.execute(
-    'SELECT * FROM travels WHERE travel_status_id = ?',
-    [WAITING_DRIVER],
-  );
+  const result = await travelModel.findByTravelStatusId(WAITING_DRIVER);
   res.status(200).json(result);
 });
 

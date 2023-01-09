@@ -1,6 +1,7 @@
 const express = require('express');
 const { passengerRouter } = require('./routers');
-const { passengerService, driverService } = require('./services');
+/* Removemos a importação do passengerService pois ele não é mais usado aqui! */
+const { driverService } = require('./services');
 
 const app = express();
 
@@ -9,19 +10,7 @@ app.use(express.json());
 /* Adicionamos o registro das rotas para o CRUD de pessoas passageiras */
 app.use('/passengers', passengerRouter);
 
-app.post('/passengers/:passengerId/request/travel', async (req, res) => {
-  const { passengerId } = req.params;
-  const { startingAddress, endingAddress, waypoints } = req.body;
-
-  const travel = await passengerService.requestTravel(
-    passengerId, 
-    startingAddress, 
-    endingAddress, 
-    waypoints,
-  );
-  
-  res.status(201).json(travel);
-});
+/* Apagamos o código que ficava aqui! */
 
 app.get('/drivers/open/travels', async (_req, res) => {
   const result = await driverService.getWaitingDriverTravels();

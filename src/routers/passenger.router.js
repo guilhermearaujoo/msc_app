@@ -23,4 +23,9 @@ router.post(
   passengerController.createPassenger,
 );
 
+router.post(
+  '/:passengerId/request/travel',
+  passengerController.createTravel,
+);
+
 module.exports = router;

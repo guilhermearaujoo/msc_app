@@ -1,14 +1,13 @@
 const express = require('express');
-/* Adicionamos a importação dos services */
+const { passengerRouter } = require('./routers');
 const { passengerService, driverService } = require('./services');
 
 const app = express();
 
 app.use(express.json());
 
-const DRIVER_ON_THE_WAY = 2;
-const TRAVEL_IN_PROGRESS = 3;
-const TRAVEL_FINISHED = 4;
+/* Adicionamos o registro das rotas para o CRUD de pessoas passageiras */
+app.use('/passengers', passengerRouter);
 
 app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const { passengerId } = req.params;

@@ -1,48 +1,33 @@
 const express = require('express');
-const { passengerModel, travelModel, waypointModel } = require('./models');
+/* Apagamos a importação dos models que já refatoramos para camada de service! */
+const { travelModel } = require('./models');
+/* Adicionamos a importação dos services */
+const { passengerService, driverService } = require('./services');
 
 const app = express();
 
 app.use(express.json());
 
-const WAITING_DRIVER = 1;
 const DRIVER_ON_THE_WAY = 2;
 const TRAVEL_IN_PROGRESS = 3;
 const TRAVEL_FINISHED = 4;
 
-const doesPassengerExist = async (passengerId) => {
-  const passenger = await passengerModel.findById(passengerId);
-  if (passenger) return true;
-  return false;
-};
-
-const saveWaypoints = (waypoints, travelId) => {
-  if (waypoints && waypoints.length > 0) {
-    return waypoints.map(async (value) => {
-      await waypointModel.insert({
-        address: value.address,
-        stopOrder: value.stopOrder,
-        travelId,
-      });
-    });
-  }
-  return [];
-};
-
 app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const { passengerId } = req.params;
   const { startingAddress, endingAddress, waypoints } = req.body;
-  if (await doesPassengerExist(passengerId)) {
-    const travelId = await travelModel.insert({ passengerId, startingAddress, endingAddress });
-    await Promise.all(saveWaypoints(waypoints, travelId));
-    const travel = await travelModel.findById(travelId);
-    return res.status(201).json(travel);
-  }
-  res.status(500).json({ message: 'Ocorreu um erro' });
+
+  const travel = await passengerService.requestTravel(
+    passengerId, 
+    startingAddress, 
+    endingAddress, 
+    waypoints,
+  );
+  
+  res.status(201).json(travel);
 });
 
 app.get('/drivers/open/travels', async (_req, res) => {
-  const result = await travelModel.findByTravelStatusId(WAITING_DRIVER);
+  const result = await driverService.getWaitingDriverTravels();
   res.status(200).json(result);
 });
 

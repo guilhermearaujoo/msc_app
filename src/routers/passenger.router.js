@@ -3,6 +3,8 @@
 const express = require('express');
 const { passengerController } = require('../controllers');
 
+const validateNewPassengerFields = require('../middlewares/validateNewPassengerFields');
+
 const router = express.Router();
 
 router.get(
@@ -17,6 +19,7 @@ router.get(
 
 router.post(
   '/',
+  validateNewPassengerFields,
   passengerController.createPassenger,
 );
 

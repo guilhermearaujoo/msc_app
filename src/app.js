@@ -1,5 +1,4 @@
 const express = require('express');
-const connection = require('./models/connection');
 const { passengerModel, travelModel, waypointModel } = require('./models');
 
 const app = express();
@@ -49,44 +48,24 @@ app.get('/drivers/open/travels', async (_req, res) => {
 
 app.put('/drivers/:driverId/travels/:travelId/assign', async (req, res) => {
   const { travelId, driverId } = req.params;
-  await connection.execute(
-    'UPDATE travels SET driver_id = ? WHERE id = ?',
-    [driverId, travelId],
-  );
-  await connection.execute(
-    'UPDATE travels SET travel_status_id = ? WHERE id = ? AND driver_id = ?',
-    [DRIVER_ON_THE_WAY, travelId, driverId],
-  );
-  const [[result]] = await connection.execute(
-    'SELECT * FROM travels WHERE id = ?',
-    [travelId],
-  );
-  res.status(200).json(result);
+
+  await travelModel.updateById(travelId, { driverId, travelStatusId: DRIVER_ON_THE_WAY });
+  const travel = await travelModel.findById(travelId);
+
+  res.status(200).json(travel);
 });
 
 app.put('/drivers/:driverId/travels/:travelId/start', async (req, res) => {
   const { travelId, driverId } = req.params;
-  await connection.execute(
-    'UPDATE travels SET travel_status_id = ? WHERE id = ? AND driver_id = ?',
-    [TRAVEL_IN_PROGRESS, travelId, driverId],
-  );
-  const [[result]] = await connection.execute(
-    'SELECT * FROM travels WHERE id = ?',
-    [travelId],
-  );
+  await travelModel.updateById(travelId, { driverId, travelStatusId: TRAVEL_IN_PROGRESS });
+  const result = await travelModel.findById(travelId);
   res.status(200).json(result);
 });
 
 app.put('/drivers/:driverId/travels/:travelId/end', async (req, res) => {
   const { travelId, driverId } = req.params;
-  await connection.execute(
-    'UPDATE travels SET travel_status_id = ? WHERE id = ? AND driver_id = ?',
-    [TRAVEL_FINISHED, travelId, driverId],
-  );
-  const [[result]] = await connection.execute(
-    'SELECT * FROM travels WHERE id = ?',
-    [travelId],
-  );
+  await travelModel.updateById(travelId, { driverId, travelStatusId: TRAVEL_FINISHED });
+  const result = await travelModel.findById(travelId);
   res.status(200).json(result);
 });
 

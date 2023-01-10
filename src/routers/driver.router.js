@@ -12,26 +12,14 @@ router.put(
   driverController.travelAssign,
 );
 
-router.put('/:driverId/travels/:travelId/start', async (req, res) => {
-  const { travelId, driverId } = req.params;
-  const { type, message } = await driverService.startTravel({
-    travelId,
-    driverId,
-  });
-  if (type) return res.status(type).json(message);
+router.put(
+  '/:driverId/travels/:travelId/start',
+  driverController.startTravel,
+);
 
-  res.status(200).json(message);
-});
-
-router.put('/:driverId/travels/:travelId/end', async (req, res) => {
-  const { travelId, driverId } = req.params;
-  const { type, message } = await driverService.endTravel({
-    travelId,
-    driverId,
-  });
-  if (type) return res.status(type).json(message);
-
-  res.status(200).json(message);
-});
+router.put(
+  '/:driverId/travels/:travelId/end',
+  driverController.endTravel,
+);
 
 module.exports = router;

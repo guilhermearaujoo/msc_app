@@ -77,6 +77,23 @@ describe('Teste de unidade do driverController', function () {
     });
   });
 
+  describe('Atribuições de viagem com motorista ocupado', function () {
+    it('retorna status 409 e mensagem travel already assigned', async function () {
+      const res = {};
+      const req = { params: { travelId: 1, driverId: 1 }, body: { } };
+
+      res.status = sinon.stub().returns(res);
+      res.json = sinon.stub().returns();
+      sinon.stub(driverService, 'travelAssign')
+        .resolves({ type: 'TRAVEL_CONFLICT', message: 'travel already assigned' });
+
+      await driverController.travelAssign(req, res);
+
+      expect(res.status).to.have.been.calledWith(409);
+      expect(res.json).to.have.been.calledWith({ message: 'travel already assigned' });
+    });
+  });
+
   afterEach(function () {
     sinon.restore();
   });

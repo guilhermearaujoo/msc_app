@@ -1,7 +1,9 @@
-const driverRouter = require('./driver.router');
+// src/routers/index.js
+
 const passengerRouter = require('./passenger.router');
+const driverRoutes = require('./driver.router');
 
 module.exports = {
-  driverRouter,
   passengerRouter,
+  driverRoutes,
 };

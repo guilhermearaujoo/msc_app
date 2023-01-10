@@ -1,16 +1,12 @@
+// src/routers/passenger.router.js
+
 const express = require('express');
-const passengerController = require('../controllers/passenger.controller');
+const { passengerController } = require('../controllers');
 
 const validateNewPassengerFields = require('../middlewares/validateNewPassengerFields');
-const validateRequestTravelSchema = require('../middlewares/validatePassengerFields');
+const validateRequestTravelSchema = require('../middlewares/validateRequestTravelSchema');
 
 const router = express.Router();
-
-router.post(
-  '/:passengerId/request/travel',
-  validateRequestTravelSchema,
-  passengerController.createTravel,
-);
 
 router.get(
   '/',
@@ -26,6 +22,12 @@ router.post(
   '/',
   validateNewPassengerFields,
   passengerController.createPassenger,
+);
+
+router.post(
+  '/:passengerId/request/travel',
+  validateRequestTravelSchema,
+  passengerController.createTravel,
 );
 
 module.exports = router;

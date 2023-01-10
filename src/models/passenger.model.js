@@ -6,7 +6,7 @@ const findAll = async () => {
   const [result] = await connection.execute(
     'SELECT * FROM passengers',
   );
-  return camelize(result);
+  return camelize(result); 
 };
 
 const findById = async (passengerId) => {
@@ -18,9 +18,7 @@ const findById = async (passengerId) => {
 };
 
 const insert = async (passenger) => {
-  const columns = Object.keys(snakeize(passenger))
-    .map((key) => `${key}`)
-    .join(', ');
+  const columns = Object.keys(snakeize(passenger)).join(', ');
 
   const placeholders = Object.keys(passenger)
     .map((_key) => '?')

@@ -1,5 +1,7 @@
 const express = require('express');
+/* Apagamos a importação dos models que já refatoramos para camada de service! */
 const { travelModel } = require('./models');
+/* Adicionamos a importação dos services */
 const { passengerService, driverService } = require('./services');
 
 const app = express();

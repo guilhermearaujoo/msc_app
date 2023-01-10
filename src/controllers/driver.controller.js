@@ -13,6 +13,15 @@ const openTravel = async (_req, res) => {
   res.status(200).json(message);
 };
 
+const travelAssign = async (req, res) => {
+  const { travelId, driverId } = req.params;
+  const { type, message } = await driverService.travelAssign({ travelId, driverId });
+  if (type) return res.status(errorMap.mapError(type)).json({ message });
+  
+  res.status(200).json(message);
+};
+
 module.exports = {
   openTravel,
+  travelAssign,
 };

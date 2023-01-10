@@ -44,4 +44,40 @@ describe('Teste de unidade do driverController', function () {
       expect(res.json).to.have.been.calledWith([]);
     });
   });
+
+  describe('Atribuições de viagem com erros de id inexistente', function () {
+    it('travelId inexistente status 404 e mensagem travelId not found', async function () {
+      const res = {};
+      const req = { params: { travelId: 9999, driverId: 1 }, body: { } };
+
+      res.status = sinon.stub().returns(res);
+      res.json = sinon.stub().returns();
+      sinon.stub(driverService, 'travelAssign')
+        .resolves({ type: 'TRAVEL_NOT_FOUND', message: '"travelId" not found' });
+
+      await driverController.travelAssign(req, res);
+
+      expect(res.status).to.have.been.calledWith(404);
+      expect(res.json).to.have.been.calledWith({ message: '"travelId" not found' });
+    });
+
+    it('driverId inexistente status 404 e mensagem driverId not found', async function () {
+      const res = {};
+      const req = { params: { travelId: 1, driverId: 9999 }, body: { } };
+
+      res.status = sinon.stub().returns(res);
+      res.json = sinon.stub().returns();
+      sinon.stub(driverService, 'travelAssign')
+        .resolves({ type: 'DRIVER_NOT_FOUND', message: '"driverId" not found' });
+
+      await driverController.travelAssign(req, res);
+
+      expect(res.status).to.have.been.calledWith(404);
+      expect(res.json).to.have.been.calledWith({ message: '"driverId" not found' });
+    });
+  });
+
+  afterEach(function () {
+    sinon.restore();
+  });
 });

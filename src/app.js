@@ -1,5 +1,5 @@
 const express = require('express');
-const { travelModel, passengerModel, waypointModel } = require('./models');
+const { passengerModel, travelModel, waypointModel } = require('./models');
 
 const app = express();
 
@@ -46,7 +46,6 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
     const travel = await travelModel.findById(travelId);
     return res.status(201).json(travel);
   }
-
   res.status(500).json({ message: 'Ocorreu um erro' });
 });
 

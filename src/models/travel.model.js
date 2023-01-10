@@ -3,9 +3,7 @@ const snakeize = require('snakeize');
 const connection = require('./connection');
 
 const insert = async (travel) => {
-  const columns = Object.keys(snakeize(travel))
-    .map((key) => `${key}`)
-    .join(', ');
+  const columns = Object.keys(snakeize(travel)).join(', ');
 
   const placeholders = Object.keys(travel)
     .map((_key) => '?')
@@ -39,11 +37,11 @@ const updateById = async (travelId, dataToUpdate) => {
   const formattedColumns = Object.keys(snakeize(dataToUpdate))
     .map((key) => `${key} = ?`)
     .join(', ');
-  
-    return connection.execute(
-      `UPDATE travels SET ${formattedColumns} WHERE id = ?`,
-      [...Object.values(dataToUpdate), travelId],
-    );
+
+  return connection.execute(
+    `UPDATE travels SET ${formattedColumns} WHERE id = ?`,
+    [...Object.values(dataToUpdate), travelId],
+  );
 };
 
 module.exports = {

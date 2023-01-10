@@ -1,175 +1,84 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const {
-  findAll, findById, requestTravel, createPassenger,
-} = require('../../../src/services/passenger.service');
 const travelModel = require('../../../src/models/travel.model');
-const waypointModel = require('../../../src/models/waypoint.model');
-const passengerModel = require('../../../src/models/passenger.model');
-
+const driveDB = require('../../../src/models/driver.model');
+const driver = require('../../../src/services/driver.service');
 const {
-  travelResponse, allPassengers, invalidValue,
-  validName, validEmail, validPhone,
-} = require('./mocks/passenger.service.mock');
+  correctReturnTravel,
+  correctReturnDriver,
+  busyDriver,
+} = require('./mocks/driver.service.mock');
 
-describe('Verificando service pessoa passageira', function () {
-  describe('listagem de pessoas passageiras', function () {
-    it('retorna a lista completa de pessoas passageiras', async function () {
-      sinon.stub(passengerModel, 'findAll').resolves(allPassengers);
-      
-      const result = await findAll();
+const DRIVER_ON_THE_WAY = 2;
 
-      expect(result.message).to.deep.equal(allPassengers);
-    });
-  });
-  
-  describe('busca de uma pessoa passageira', function () {
-    it('retorna um erro caso receba um ID inválido', async function () {
-      const result = await findById(invalidValue);
-      
-      expect(result.type).to.equal('INVALID_VALUE');
-      expect(result.message).to.equal('"id" must be a number');
-    });
+describe('Verificando service Driver', function () {
+  /* Validar se os IDs recebidos são existentes */
+  describe('Atribuições de viagem com erros de id inexistente', function () {
+    it('estão falhando ao tentar atribuir uma viagem com viajante inexistente', async function () {
+      sinon.stub(travelModel, 'findById').resolves(undefined);
 
-    it('retorna um erro caso a pessoa passageira não existe', async function () {
-      sinon.stub(passengerModel, 'findById').resolves(undefined);
-     
-      const result = await findById(1);
-      
-      expect(result.type).to.equal('PASSENGER_NOT_FOUND');
-      expect(result.message).to.equal('Passenger not found');
-    });
+      const body = { travelId: 99999, driverId: 1 };
+      const error = await driver.travelAssign(body);
     
-    it('retorna a pessoa passageira caso ID existente', async function () {
-      sinon.stub(passengerModel, 'findById').resolves(allPassengers[0]);
+      expect(error.type).to.equal('TRAVEL_NOT_FOUND');
+      expect(error.message).to.equal('travel id not found');
+    });
+
+    it('estão falhando ao tentar atribuir uma viagem com motorista inexistente', async function () {
+      sinon.stub(travelModel, 'findById').resolves(correctReturnTravel);
+      sinon.stub(driveDB, 'findById').resolves(undefined);
+
+      const body = { travelId: 1, driverId: 99999 };
+      const error = await driver.travelAssign(body);
+    
+      expect(error.type).to.equal('DRIVER_NOT_FOUND');
+      expect(error.message).to.equal('driver id not found');
+    });
+  });
+
+  /* Validar se o motorista que esta tentando pegar uma viagem, não esta em outra viajem */
+  describe('Atribuições de viagem com motorista ocupado', function () {
+    it('esta falhando ao tentar iniciar uma viagem com motorista ocupado', async function () {
+      sinon.stub(travelModel, 'findById')
+        .onFirstCall()
+          .resolves(correctReturnTravel)
+        .onSecondCall()
+          .resolves(busyDriver);
+      sinon.stub(driveDB, 'findById').resolves(correctReturnDriver);
       
-      const result = await findById(1);
+      const body = { travelId: 1, driverId: 1 };
+      const error = await driver.travelAssign(body);
 
-      expect(result.type).to.equal(null);
-      expect(result.message).to.deep.equal(allPassengers[0]);
+      expect(error.type).to.equal('TRAVEL_CONFLICT');
+      expect(error.message).to.equal('travel already assigned');
+      sinon.restore();
     });
   });
 
-  describe('cadastro de uma pessoa passageira com valores inválidos', function () {
-    it('retorna um erro ao passar um nome inválido', async function () {
-      const result = await createPassenger(invalidValue, validEmail, validPhone);
+  /* Validar se podemos atribuir uma viagem com sucesso */
+  describe('Atribuições de viagem com sucesso', function () {
+    it('estão atribuindo com sucesso', async function () {
+      sinon.stub(travelModel, 'updateById').resolves(true);
+      sinon.stub(travelModel, 'findById').resolves(correctReturnTravel);
+      sinon.stub(driveDB, 'findById').resolves(correctReturnDriver);
 
-      expect(result.type).to.equal('INVALID_VALUE');
-      expect(result.message).to.equal('"name" length must be at least 3 characters long');
-    });
-
-    it('retorna um erro ao passar um email inválido', async function () {
-      const result = await createPassenger(validName, invalidValue, validPhone);
-
-      expect(result.type).to.equal('INVALID_VALUE');
-      expect(result.message).to.equal('"email" must be a valid email');
-    });
-
-    it('retorna um erro ao passar um telefone inválido', async function () {
-      const result = await createPassenger(validName, validEmail, invalidValue);
-
-      expect(result.type).to.equal('INVALID_VALUE');
-      expect(result.message).to.equal('"phone" length must be at least 9 characters long');
-    });
-  });
-
-  describe('cadastro de uma pessoa passageira com valores válidos', function () {
-    it('retorna o ID da pessoa passageira cadastrada', async function () {
-      sinon.stub(passengerModel, 'insert').resolves([{ insertId: 1 }]);
-      sinon.stub(passengerModel, 'findById').resolves(allPassengers[0]);
-      
-      const result = await createPassenger(validName, validEmail, validPhone);
-
-      expect(result.type).to.equal(null);
-      expect(result.message).to.deep.equal(allPassengers[0]);
-    });
-  });
-
-  describe('solicitação de viagem', function () {
-    it('sem pontos de parada é realizada com sucesso', async function () {
-      // arrange
-       sinon.stub(passengerModel, 'findById').resolves(true); // retorna verdadeiro sinalizando que o passageiro existe
-       sinon.stub(travelModel, 'insert').resolves(1); // retorna travel com ID 1
-       sinon.stub(travelModel, 'findById').resolves(travelResponse);
-      const WAITING_DRIVER = 1;
-      const passenger = {
-        id: 1,
-        startingAddress: 'Rua X',
-        endingAddress: 'Rua Y',
-      };
-      // act
-      const travel = await requestTravel(
-        passenger.id,
-        passenger.startingAddress,
-        passenger.endingAddress,
-      );
-      // assert
+      const body = { travelId: 1, driverId: 1 };
+      const travel = await driver.travelAssign(body);
+  
       expect(travel.message).to.deep.equal({
         id: 1,
         passengerId: 1,
         driverId: null,
-        travelStatusId: WAITING_DRIVER,
-        startingAddress: 'Rua X',
-        endingAddress: 'Rua Y',
+        travelStatusId: DRIVER_ON_THE_WAY,
+        startingAddress: 'Start',
+        endingAddress: 'End',
         requestDate: '2022-08-24T03:04:04.374Z',
       });
-    });
-
-    it('com pontos de parada é realizada com sucesso', async function () {
-      // arrange
-      sinon.stub(passengerModel, 'findById').resolves(true); // retorna verdadeiro sinalizando que o passageiro existe
-       sinon.stub(travelModel, 'insert').resolves(1); // retorna travel com ID 1
-       sinon.stub(travelModel, 'findById').resolves(travelResponse);
-       sinon.stub(waypointModel, 'insert').resolves(1); // retorna waypoint com ID 1
-
-      const WAITING_DRIVER = 1;
-      const passenger = {
-        id: 1,
-        startingAddress: 'Rua X',
-        endingAddress: 'Rua Y',
-      };
-
-      // act
-      const travel = await requestTravel(
-        passenger.id,
-        passenger.startingAddress,
-        passenger.endingAddress,
-        passenger.waypoints,
-      );
-
-      // assert
-      expect(travel.message).to.deep.equal({
-        id: 1,
-        passengerId: 1,
-        driverId: null,
-        travelStatusId: WAITING_DRIVER,
-        startingAddress: 'Rua X',
-        endingAddress: 'Rua Y',
-        requestDate: '2022-08-24T03:04:04.374Z',
-      });
-    });
-
-    it('com mesmo local de origem e destino é rejeitada', async function () {
-      // arrange
-      const passenger = {
-        id: 1,
-        startingAddress: 'Rua X',
-        endingAddress: 'Rua X',
-      };
-
-      // act
-      const error = await requestTravel(
-        passenger.id,
-        passenger.startingAddress,
-        passenger.endingAddress,
-      );
-
-      // assert
-      expect(error.type).to.equal('INVALID_VALUE');
-      expect(error.message).to.equal('"endingAddress" contains an invalid value');
+      sinon.restore();
     });
   });
-   afterEach(function () {
-     sinon.restore();
-   });
- });
+
+  afterEach(function () {
+    sinon.restore();
+  });
+});

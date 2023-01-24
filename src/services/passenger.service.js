@@ -26,7 +26,7 @@ const createPassenger = async (name, email, phone) => {
   return { type: null, message: newPassenger };
 };
 
-const doesPassengerExist = async (passengerId) => {
+const doespassengerExists = async (passengerId) => {
   const passenger = await passengerModel.findById(passengerId);
   if (passenger) return true;
   return false;
@@ -56,7 +56,7 @@ const requestTravel = async (passengerId, startingAddress, endingAddress, waypoi
 
   if (validationResult.type) return validationResult;
 
-  if (await doesPassengerExist(passengerId)) {
+  if (await doespassengerExists(passengerId)) {
       const travelId = await travelModel.insert({
           passengerId,
           startingAddress,

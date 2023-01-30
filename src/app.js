@@ -34,8 +34,7 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
   const { passengerId } = req.params;
   const { startingAddress, endingAddress, waypoints } = req.body;
 
-
-  if (passengerExists(passengerId)) {
+  if (await passengerExists(passengerId)) {
     const [resultTravel] = await connection.execute(
       `INSERT INTO travels 
           (passenger_id, starting_address, ending_address) VALUE (?, ?, ?)`,
@@ -50,8 +49,7 @@ app.post('/passengers/:passengerId/request/travel', async (req, res) => {
       'SELECT * FROM travels WHERE id = ?',
       [resultTravel.insertId],
     );
-    res.status(201).json(camelize(response));
-    return;
+    return res.status(201).json(camelize(response));
   }
   res.status(500).json({ message: 'Ocorreu um erro' });
 });

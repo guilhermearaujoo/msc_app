@@ -12,12 +12,6 @@ const {
 const DRIVER_ON_THE_WAY = 2;
 
 describe('Verificando service Driver', function () {
-   /* 
-  Aqui vai haver outros testes a serem implementados 
-  no exercícios de fixação da lição "Refatorando - Parte 2"
-  do dia BE5.2  - Arquitetura de Software: Camada Service!
-  */
-
   /* Validar se os IDs recebidos são existentes */
   describe('Atribuições de viagem com erros de id inexistente', function () {
     it('estão falhando ao tentar atribuir uma viagem com viajante inexistente', async function () {

@@ -3,12 +3,6 @@ const DRIVER_ON_THE_WAY = 2;
 const TRAVEL_IN_PROGRESS = 3;
 const TRAVEL_FINISHED = 4;
 
-/* 
-Aqui vai haver outros mocks a serem implementados nos 
-exercícios de fixação da lição "Refatorando - Parte 2"
-do dia BE5.2  - Arquitetura de Software: Camada Service!!
-*/
-
 const correctReturnTravel = ({
   id: 1,
   passengerId: 1,

@@ -156,7 +156,9 @@ describe('Teste de unidade do passengerController', function () {
       no contrato estabelecido na camada Service */
       sinon
         .stub(passengerService, 'createPassenger')
-        .resolves({ type: 'INVALID_VALUE', message: '"name" length must be at least 3 characters long' });
+        .resolves({
+          type: 'INVALID_VALUE', message: '"name" length must be at least 3 characters long',
+        });
 
       // Act
       await passengerController.createPassenger(req, res);

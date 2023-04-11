@@ -37,6 +37,7 @@ describe('Testes de unidade do model de viagens', function () {
   });
 
   it('Realizando uma operação UPDATE com o model travel - rota .../assign', async function () {
+    // arrange
     sinon.stub(connection, 'execute').resolves(travelsUpdated);
 
     const travelId = 1;
@@ -44,8 +45,10 @@ describe('Testes de unidade do model de viagens', function () {
     const status = 2; // Aqui pode ser: "motorista a caminho", "corrida finalizada", ...
     const update = { driverId, status };
 
+    // act
     const result = await travelModel.updateById(travelId, update);
 
+    // assert
     expect(result[0].affectedRows).to.be.deep.equal(1);
     expect(result[0].changedRows).to.be.deep.equal(1);
   });

@@ -1,6 +1,5 @@
 // src/routers/driver.router.js
 const express = require('express');
-const { driverService } = require('../services');
 const { driverController } = require('../controllers');
 
 const router = express.Router();
